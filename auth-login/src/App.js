@@ -1,57 +1,89 @@
-
+import React, {useState, useEffect} from 'react';
+import fire from './fire';
+import Login from './Login/Login'
+import Home from './Home/Home'
 import './App.css';
-import firebase from 'firebase/app';
-import "firebase/auth";
-import { config } from './config'
-import {
-  FirebaseAuthConsumer,
-  FirebaseAuthProvider,
-  IfFirebaseAuthed,
-  IfFirebaseAuthedAnd
-} from "@react-firebase/auth"
 function App() {
+  const [user, setUser] = useState('');
+  const [email, setEmail]= useState('');
+  const [password, setPassword]= useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [hasAccount, setHasAccount] = useState(false);
+  console.log(fire);
+  const clearInputs = () => {
+    setEmail('');
+    setPassword('');
+  };
+  const clearErrors = () => {
+    setEmailError('');
+    setPassword('');
+  };
 
+  const handleLogin = () => {
+    clearInputs()
+    fire.auth()
+      .signInWithEmailAndPassword(email, password)
+      .catch((err) => {
+      if(err.code == 'auth/invalid-email' || 
+         err.code == 'auth/user-disabled' ||
+         err.code == 'auth/user-not-found'){ 
+          setEmailError(err.message);
+       }
+      else if(err.code == 'auth/wrong-password') {
+        setPasswordError(err.message);
+      }
+    })
+  };
+  
+
+  const handleSignUp = () => {
+    clearErrors()
+    fire.auth()
+    .createUserWithEmailAndPassword(email, password)
+    .catch((err) => {
+      if(err.code == 'auth/email-already-in-use' || 
+         err.code == 'auth/invalid-email') {
+         setEmailError(err.message);
+      }
+      else if(err.code == 'auth/weak-password') {
+        setPasswordError(err.message);
+      }
+    })
+  };
+
+  const handleLogOut = () => {
+    fire.auth().signOut();
+  };
+
+  const authListener = () => {
+    clearInputs()
+    fire.auth().onAuthStateChanged(user => {
+      if(user) {
+        setUser(user)
+      } else {
+        setUser('');
+      }
+    })
+  };
+ useEffect(() => {
+  authListener()
+ }, [])
   return (
-    <FirebaseAuthProvider {...config} firebase={firebase}>
-      <div>
-        <button onClick={() => {
-          const googleAuthProvider = new firebase.auth.GoogleAuthProvider()
-          firebase.auth().signInWithPopup(googleAuthProvider)
-        }}>
-          sign in
-        </button>
-        <button onClick={() => {
-          firebase.auth().signOut()
-        }}>
-          sign out
-        </button>
-        <FirebaseAuthConsumer>
-          {(props) => {
-            console.log(props)
-            let {isSignedIn, user, providerId} = props;
-            return (
-              <pre style={{ height: 300, overflow: "auto" }}>
-                {JSON.stringify({ isSignedIn, user, providerId }, null, 2)}
-              </pre>
-            );
-          }}
-        </FirebaseAuthConsumer>
-      </div>
-      <IfFirebaseAuthed>
-            {() => {
-              return <div>You are authenticated</div>;
-            }}
-      </IfFirebaseAuthed>
-          <IfFirebaseAuthedAnd
-            filter={({ providerId }) => providerId !== "anonymous"}
-          >
-            {({ providerId }) => {
-              return <div>You are authenticated with {providerId}</div>;
-            }}
-          </IfFirebaseAuthedAnd>
-      <div>
-      </div>
-    </FirebaseAuthProvider>
+    <div className="App">
+    {user ? (<Home handleLogOut={handleLogOut}/>)
+         : ( <Login email={email}
+       setEmail={setEmail}
+        password={password}
+        setPassword={setPassword}
+        handleLogin={handleLogin}
+        handleSignUp={handleSignUp}
+        hasAccount={hasAccount}
+        setHasAccount={setHasAccount}
+        emailError={emailError}
+        passwordError={passwordError}
+        /> )} 
+    </div>
   );
 }
 
