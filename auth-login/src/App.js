@@ -24,9 +24,9 @@ function App() {
     fire.auth()
       .signInWithEmailAndPassword(email, password)
       .catch((err) => {
-      if(err.code == 'auth/invalid-email' || 
-         err.code == 'auth/user-disabled' ||
-         err.code == 'auth/user-not-found'){ 
+      if(err.code === 'auth/invalid-email' || 
+         err.code === 'auth/user-disabled' ||
+         err.code === 'auth/user-not-found'){ 
           setEmailError(err.message);
        }
       else if(err.code == 'auth/wrong-password') {
@@ -41,8 +41,8 @@ function App() {
     fire.auth()
     .createUserWithEmailAndPassword(email, password)
     .catch((err) => {
-      if(err.code == 'auth/email-already-in-use' || 
-         err.code == 'auth/invalid-email') {
+      if(err.code === 'auth/email-already-in-use' || 
+         err.code === 'auth/invalid-email') {
          setEmailError(err.message);
       }
       else if(err.code == 'auth/weak-password') {
