@@ -10,14 +10,13 @@ function App() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [hasAccount, setHasAccount] = useState(false);
-  console.log(fire);
   const clearInputs = () => {
     setEmail('');
     setPassword('');
   };
   const clearErrors = () => {
-    setEmailError('');
-    setPassword('');
+      setEmailError('');
+      passwordError('');
   };
 
   const handleLogin = () => {
